@@ -1,0 +1,71 @@
+containers:
+  rust:
+    environ:
+      HOME: /work/.vagga-ws
+    setup:
+      - !Ubuntu bionic
+      - !UbuntuUniverse
+      - !TarInstall
+        url: https://static.rust-lang.org/dist/rust-1.35.0-x86_64-unknown-linux-gnu.tar.gz
+        script: ./install.sh --prefix=/usr
+      - !TarInstall
+        url: https://static.rust-lang.org/dist/rust-1.35.0-x86_64-unknown-linux-musl.tar.gz
+        script: ./install.sh --prefix=/usr --components=rust-std-x86_64-unknown-linux-musl
+
+  rust-build:
+    environ:
+      HOME: /work/.vagga-ws
+    setup:
+      - !Ubuntu bionic
+      - !UbuntuUniverse
+      - !Build
+        container: rust
+        source: /usr
+        path: /usr
+      - !Install [build-essential, curl, ca-certificates]
+      - !CacheDirs
+        /tmp/.cargo: cargo
+
+  pavetta-sdk-common:
+    setup:
+      - !Ubuntu bionic
+      - !UbuntuUniverse
+      - !Install [build-essential]
+      - !Build
+        container: pavetta-redist
+        source: /usr/local/bin
+        path: /usr/local/bin
+        rules:
+        - /pavetta
+
+  pavetta-sdk-custom:
+    environ:
+      HOME: /work/.vagga-ws
+    setup:
+      - !Container pavetta-sdk-common
+
+  pavetta-redist:
+    environ:
+      HOME: /tmp
+    setup:
+      - !Container rust-build
+      - !Depends 
+        path: pavetta
+        rules:
+        - /src
+        - /Cargo.toml
+      - !Sh |
+         cd pavetta
+         cargo build --target-dir /work/.vagga-ws/target/pavetta
+      - !Copy
+        source: /work/.vagga-ws/target/pavetta/debug/pavetta
+        path: /usr/local/bin/pavetta
+
+commands:
+  pavetta: !Command
+    group: pavetta
+    container: pavetta-sdk-custom
+    work-dir: /usr/local/bin
+    accepts-arguments: true
+    run: |
+      RUST_BACKTRACE=1 pavetta "$@"
