@@ -42,7 +42,8 @@ containers:
     environ:
       HOME: /work/.vagga-ws
     setup:
-      - !Container pavetta-sdk-common
+      - !SubConfig
+        container: pavetta-sdk-common
 
   pavetta-redist:
     environ:
