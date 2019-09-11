@@ -28,8 +28,6 @@ containers:
 
   pavetta-sdk-common:
     setup:
-      - !Ubuntu bionic
-      - !UbuntuUniverse
       - !Install [build-essential]
       - !Build
         container: pavetta-redist
@@ -42,6 +40,8 @@ containers:
     environ:
       HOME: /work/.vagga-ws
     setup:
+      - !Ubuntu bionic
+      - !UbuntuUniverse
       - !SubConfig
         container: pavetta-sdk-common
 
