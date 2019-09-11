@@ -57,9 +57,7 @@ containers:
       - !Sh |
          cd pavetta
          cargo build --target-dir /work/.vagga-ws/target/pavetta
-      - !Copy
-        source: /work/.vagga-ws/target/pavetta/debug/pavetta
-        path: /usr/local/bin/pavetta
+      - !Sh "cp /work/.vagga-ws/target/pavetta/debug/pavetta /usr/local/bin/pavetta"
 
 commands:
   pavetta: !Command
